@@ -1,0 +1,7 @@
+{
+  "phase": "testcases",
+  "active_spec": "docs/spec.md",
+  "approved": true,
+  "feature": "backend_mvp",
+  "last_updated": "2026-04-29"
+}
