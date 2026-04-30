@@ -106,16 +106,15 @@ class ParentChildRelationCreateSerializer(serializers.Serializer):
     child_id = serializers.UUIDField()
 
     def validate_child_id(self, value):
-        try:
-            child_user = User.objects.get(id=value, role=User.ROLE_CHILD)
-        except User.DoesNotExist:
+        if not User.objects.filter(id=value, role=User.ROLE_CHILD).exists():
             raise NotFound('対象の子どもが見つかりません。')
-        self._child_profile = child_user.child_profile
         return value
 
     def create(self, validated_data):
         parent_profile = self.context['request'].user.parent_profile
-        child_profile = self._child_profile
+        child_profile = User.objects.get(
+            id=validated_data['child_id'], role=User.ROLE_CHILD
+        ).child_profile
         relation, created = ParentChildRelation.objects.get_or_create(
             parent=parent_profile,
             child=child_profile,

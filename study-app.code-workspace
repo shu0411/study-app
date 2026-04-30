@@ -7,5 +7,6 @@
       "path": "backend",
     },
   ],
-  "settings": {},
+  "settings": {
+  },
 }

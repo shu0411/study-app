@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsChild(BasePermission):
-    def has_permission(self, request, view):
+    def has_permission(self, request, _view):
         return bool(
             request.user
             and request.user.is_authenticated
@@ -11,7 +11,7 @@ class IsChild(BasePermission):
 
 
 class IsParent(BasePermission):
-    def has_permission(self, request, view):
+    def has_permission(self, request, _view):
         return bool(
             request.user
             and request.user.is_authenticated

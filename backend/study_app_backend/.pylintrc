@@ -1,0 +1,14 @@
+[MESSAGES CONTROL]
+# AGENTS.md: "コメント最小限" 方針に従いdocstring系ルールを無効化
+# R0903: テストクラスや小さなViewクラスは意図的にメソッドが少ない
+disable=
+    C0114,
+    C0115,
+    C0116,
+    R0903
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-args=8
