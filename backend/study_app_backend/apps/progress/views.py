@@ -1,13 +1,11 @@
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import ChildProfile, ParentChildRelation
 from apps.accounts.permissions import IsChild, IsParent
-from apps.quiz.models import Subject
 from .models import AnswerHistory
 from .serializers import AnswerSubmitSerializer, SubjectSummarySerializer
 
@@ -16,8 +14,8 @@ def _build_summary(child_profile):
     rows = (
         AnswerHistory.objects.filter(child=child_profile)
         .values(
-            subject_id=_subject_id_expr(),
-            subject_name=_subject_name_expr(),
+            subject_id=F('question__topic__unit__subject__id'),
+            subject_name=F('question__topic__unit__subject__name'),
         )
         .annotate(
             total=Count('id'),
@@ -36,16 +34,6 @@ def _build_summary(child_profile):
             'accuracy_rate': round(correct / total, 4) if total else 0.0,
         })
     return result
-
-
-def _subject_id_expr():
-    from django.db.models import F
-    return F('question__topic__unit__subject__id')
-
-
-def _subject_name_expr():
-    from django.db.models import F
-    return F('question__topic__unit__subject__name')
 
 
 class AnswerSubmitView(APIView):

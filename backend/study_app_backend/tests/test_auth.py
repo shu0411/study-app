@@ -1,5 +1,9 @@
 import pytest
+from datetime import timedelta
+from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from apps.accounts.models import ChildProfile, ParentProfile, User
 
 
 REGISTER_CHILD_URL = '/api/v1/auth/register/child/'
@@ -23,6 +27,8 @@ class TestChildRegister:
         assert resp.status_code == 201
         assert resp.data['role'] == 'child'
         assert 'id' in resp.data
+        user = User.objects.get(id=resp.data['id'])
+        assert ChildProfile.objects.filter(user=user).exists()
 
     def test_duplicate_username(self, api_client, child_user):
         """TC-AUTH-006"""
@@ -116,6 +122,8 @@ class TestParentRegister:
         assert resp.status_code == 201
         assert resp.data['role'] == 'parent'
         assert 'id' in resp.data
+        user = User.objects.get(id=resp.data['id'])
+        assert ParentProfile.objects.filter(user=user).exists()
 
 
 @pytest.mark.django_db
@@ -155,9 +163,11 @@ class TestTokenRefresh:
         resp2 = api_client.post(REFRESH_URL, {'refresh': old_refresh_str}, format='json')
         assert resp2.status_code == 401
 
-    def test_invalid_token(self, api_client):
-        """TC-AUTH-009"""
-        resp = api_client.post(REFRESH_URL, {'refresh': 'invalidtoken'}, format='json')
+    def test_expired_refresh_token(self, api_client, child_user):
+        """TC-AUTH-009: 期限切れ refresh トークン → 401"""
+        refresh = RefreshToken.for_user(child_user)
+        refresh.set_exp(lifetime=timedelta(seconds=-1))
+        resp = api_client.post(REFRESH_URL, {'refresh': str(refresh)}, format='json')
         assert resp.status_code == 401
 
 
@@ -175,7 +185,3 @@ class TestLogout:
         anon = APIClient()
         resp2 = anon.post(REFRESH_URL, {'refresh': refresh_str}, format='json')
         assert resp2.status_code == 401
-
-
-# ローカルimportを避けるため上部でも import しておく
-from rest_framework.test import APIClient  # noqa: E402

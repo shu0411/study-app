@@ -1,32 +1,20 @@
-import re
 from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
-from .models import User, ChildProfile, ParentProfile, ParentChildRelation
-
-
-def _validate_password(value):
-    if len(value) < 8:
-        raise serializers.ValidationError('パスワードは8文字以上で入力してください。')
-    if not re.search(r'[A-Za-z]', value):
-        raise serializers.ValidationError('パスワードには英字を含めてください。')
-    if not re.search(r'\d', value):
-        raise serializers.ValidationError('パスワードには数字を含めてください。')
-    return value
+from .models import (
+    User, ChildProfile, ParentProfile, ParentChildRelation,
+    validate_username_format, validate_password_strength,
+)
 
 
 class ChildRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=30)
+    username = serializers.CharField(max_length=30, validators=[validate_username_format])
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, validators=[validate_password_strength])
     nickname = serializers.CharField(max_length=50)
     grade = serializers.IntegerField(min_value=1, max_value=9)
 
     def validate_username(self, value):
-        if not re.match(r'^[a-zA-Z0-9_]{3,30}$', value):
-            raise serializers.ValidationError(
-                'ユーザーネームは3〜30文字の英数字・アンダースコアのみ使用できます。'
-            )
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError('このユーザーネームは既に使用されています。')
         return value
@@ -35,9 +23,6 @@ class ChildRegisterSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('このメールアドレスは既に使用されています。')
         return value
-
-    def validate_password(self, value):
-        return _validate_password(value)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -54,16 +39,12 @@ class ChildRegisterSerializer(serializers.Serializer):
 
 
 class ParentRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=30)
+    username = serializers.CharField(max_length=30, validators=[validate_username_format])
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, validators=[validate_password_strength])
     display_name = serializers.CharField(max_length=100)
 
     def validate_username(self, value):
-        if not re.match(r'^[a-zA-Z0-9_]{3,30}$', value):
-            raise serializers.ValidationError(
-                'ユーザーネームは3〜30文字の英数字・アンダースコアのみ使用できます。'
-            )
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError('このユーザーネームは既に使用されています。')
         return value
@@ -72,9 +53,6 @@ class ParentRegisterSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('このメールアドレスは既に使用されています。')
         return value
-
-    def validate_password(self, value):
-        return _validate_password(value)
 
     @transaction.atomic
     def create(self, validated_data):
