@@ -17,6 +17,6 @@ PyJWT==2.13.0
 pylint==4.0.5
 pytest==9.0.3
 pytest-django==4.12.0
-sqlparse==0.5.4
+sqlparse==0.6.0
 tomlkit==0.14.0
 tzdata==2025.2
