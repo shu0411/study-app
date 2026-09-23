@@ -94,14 +94,35 @@ npm run dev
 
 ### バックエンド
 
+uv を導入してから、リポジトリのルートで以下を実行します。
+Python 3.12 系を使用します。uv が対応する Python を見つけられない場合は自動取得します。
+
 ```bash
 cd backend
-pip install -r requirements.txt
-python manage.py runserver
+uv sync --locked
+cd study_app_backend
+uv run --locked python manage.py migrate
+uv run --locked python manage.py runserver
 ```
 
+仮想環境は `backend/.venv` に作成されます。手動での有効化は不要です。
+依存関係は `backend/pyproject.toml`、解決済みバージョンは `backend/uv.lock` で管理します。
+依存を変更した場合は `backend/` で `uv lock` を実行し、両ファイルを合わせて Git 管理します。
+実行用の依存だけを導入する場合は `uv sync --locked --no-dev` を使用します。
+その環境でコマンドを実行する場合も `uv run --locked --no-dev` を指定します。
+
+テスト・静的解析は `backend/study_app_backend/` で実行します。
+
+```bash
+uv run --locked python manage.py check
+uv run --locked pytest
+uv run --locked pylint apps study_app_backend tests manage.py
+```
+
+移行時の検証結果と既存の静的解析の指摘は [uv 移行の検証結果](docs/testcases.md#uv-移行の検証結果) を参照してください。
+
 - React: [http://localhost:5173](http://localhost:5173)  
-- Django API: [http://localhost:8000/api/](http://localhost:8000/api/)  
+- Django API: [http://localhost:8000/api/v1/](http://localhost:8000/api/v1/)
 
 開発時は CORS 設定で React 側オリジンを許可します。
 
@@ -210,48 +231,17 @@ python manage.py runserver
 │           └── logo.svg
 │
 └── backend/                  # Django バックエンド
-    ├── manage.py
-    ├── requirements.txt
-    ├── pyproject.toml        # poetry など使う場合（任意）
-    ├── config/               # Django プロジェクト設定
-    │   ├── __init__.py
-    │   ├── settings.py
-    │   ├── urls.py
-    │   ├── asgi.py
-    │   └── wsgi.py
-    ├── apps/                 # Django アプリケーション群
-    │   ├── accounts/         # 認証・ユーザー関連
-    │   │   ├── __init__.py
-    │   │   ├── models.py
-    │   │   ├── views.py
-    │   │   ├── serializers.py
-    │   │   ├── urls.py
-    │   │   └── tests.py
-    │   ├── quiz/             # 問題・単元・回答
-    │   │   ├── __init__.py
-    │   │   ├── models.py
-    │   │   ├── views.py
-    │   │   ├── serializers.py
-    │   │   ├── urls.py
-    │   │   └── tests.py
-    │   ├── progress/         # 学習履歴・統計
-    │   │   ├── __init__.py
-    │   │   ├── models.py
-    │   │   ├── views.py
-    │   │   ├── serializers.py
-    │   │   ├── urls.py
-    │   │   └── tests.py
-    │   └── story/            # ストーリーモード
-    │       ├── __init__.py
-    │       ├── models.py
-    │       ├── views.py
-    │       ├── serializers.py
-    │       ├── urls.py
-    │       └── tests.py
-    ├── api/                  # API ルート定義
-    │   ├── __init__.py
-    │   ├── urls.py           # /api/... をまとめる
-    │   └── schema.py         # API スキーマ（任意）
-    └── scripts/              # メンテ・データ投入用スクリプト
-        └── load_sample_data.py
+    ├── .python-version       # Python バージョン
+    ├── pyproject.toml        # 依存関係と uv 設定
+    ├── uv.lock               # 解決済み依存バージョン
+    └── study_app_backend/
+        ├── manage.py
+        ├── pytest.ini
+        ├── .pylintrc
+        ├── study_app_backend/ # Django プロジェクト設定
+        ├── apps/
+        │   ├── accounts/     # 認証・ユーザー関連
+        │   ├── quiz/         # 問題・単元・回答
+        │   └── progress/     # 学習履歴・統計
+        └── tests/            # API テスト
 ```
