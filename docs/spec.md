@@ -8,6 +8,9 @@ MVP（Phase1）
 
 承認待ち
 
+既存 MVP の承認状況は `state.json` の従来の記録を引き継ぐ。
+「9. バックエンドの uv 移行」は承認済み。既存 MVP の仕様は変更しない。
+
 ---
 
 ## 1. 技術スタック
@@ -266,3 +269,41 @@ Django 標準の `AbstractUser` を継承し、`role` フィールドで種別�
 - ソーシャルログイン（Google等）
 - 画像アップロード（アバター等）
 - リアルタイム機能（WebSocket）
+
+---
+
+## 9. バックエンドの uv 移行
+
+### ステータス
+
+仕様・テストケース承認済み（2026-09-23）。実装・検証・仕様との照合レビュー済み。成果物の人間承認待ち。
+
+### 目的・対象
+
+バックエンドの依存関係管理とコマンド実行を uv に統一する。
+対象は開発環境設定と関連ドキュメントとし、API・DB・業務ロジックは変更しない。
+
+### 管理ファイル
+
+- `backend/pyproject.toml` を依存関係の定義元とする。Django アプリ自体のパッケージ化は行わない。
+- Python は既存仕様の 3.12 系を使用し、`requires-python` と `backend/.python-version` に明示する。
+- 実行用の直接依存は Django、django-cors-headers、djangorestframework、djangorestframework-simplejwt とする。
+- 開発用の直接依存は pytest、pytest-django、pylint とし、`dev` 依存グループで管理する。
+- 直接依存のバージョンは現行の `backend/requirements.txt` の指定を維持する。
+- 推移的依存の解決結果は `backend/uv.lock` に記録して Git 管理する。移行時は現行バージョンを可能な限り維持し、差分が発生した場合は確認結果に明示する。
+- `backend/requirements.txt` は移行完了時に削除し、依存関係の二重管理を避ける。
+- 仮想環境は `backend/.venv` に作成し、既存の `.gitignore` に従って Git 管理対象外とする。
+
+### 開発手順
+
+- `backend/` で `uv sync --locked` を実行すると、ロックファイルに従って実行用・開発用の依存関係がインストールされる。
+- `backend/` で `uv sync --locked --no-dev` を実行すると、実行用の依存関係のみがインストールされる。
+- Django の管理コマンドと既存の pytest・pylint は `backend/study_app_backend/` から `uv run --locked` 経由で実行する。
+- README のセットアップ・起動・テスト・静的解析手順とバックエンド構成図を実際の配置に合わせて更新する。
+
+### 検証方針
+
+承認済みの移行検証ケースに従って設定変更を検証する。
+ロックファイルと依存定義の整合性、環境構築、Django のシステムチェック、既存テスト、pylint の実行を確認する。
+既存の不具合や警告が見つかった場合は移行による問題と区別して報告する。
+検証結果は [テストケース仕様書](testcases.md#uv-移行の検証結果) に記録する。

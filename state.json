@@ -1,7 +1,17 @@
 {
   "phase": "review",
   "active_spec": "docs/spec.md",
-  "approved": true,
-  "feature": "backend_mvp",
-  "last_updated": "2026-04-30"
+  "active_testcases": "docs/testcases.md",
+  "approved": false,
+  "spec_approved": true,
+  "testcases_approved": true,
+  "feature": "backend_uv_migration",
+  "last_updated": "2026-09-23",
+  "previous_state": {
+    "phase": "review",
+    "active_spec": "docs/spec.md",
+    "approved": true,
+    "feature": "backend_mvp",
+    "last_updated": "2026-04-30"
+  }
 }

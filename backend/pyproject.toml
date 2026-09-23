@@ -1,0 +1,21 @@
+[project]
+name = "study-app-backend"
+version = "0.1.0"
+description = "学習支援 Web アプリのバックエンド"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "Django==5.2.14",
+    "django-cors-headers==4.9.0",
+    "djangorestframework==3.17.1",
+    "djangorestframework-simplejwt==5.5.1",
+]
+
+[dependency-groups]
+dev = [
+    "pylint==4.0.5",
+    "pytest==9.0.3",
+    "pytest-django==4.12.0",
+]
+
+[tool.uv]
+package = false
