@@ -63,7 +63,7 @@
 - React Router
 - 状態管理：React Hooks（必要に応じて Zustand / Redux）
 - UI：Tailwind CSS または MUI / Chakra UI
-- テスト：Jest + React Testing Library
+- テスト：Vitest + React Testing Library
 
 ### Backend
 
@@ -87,9 +87,17 @@
 ### フロントエンド
 
 ```bash
-cd frontend
+cd frontend/study_app_frontend
 npm install
 npm run dev
+```
+
+テスト・静的解析・ビルド確認は `frontend/study_app_frontend/` で実行します。
+
+```bash
+npm test
+npm run lint
+npm run build
 ```
 
 ### バックエンド
@@ -125,6 +133,12 @@ uv run --locked pylint apps study_app_backend tests manage.py
 - Django API: [http://localhost:8000/api/v1/](http://localhost:8000/api/v1/)
 
 開発時は CORS 設定で React 側オリジンを許可します。
+
+### CI
+
+GitHub Actions（[.github/workflows/ci.yml](.github/workflows/ci.yml)）で、`main` への push と Pull Request ごとに
+フロントエンド（lint・テスト・ビルド）とバックエンド（`manage.py check`・pytest）を実行します。
+依存関係の更新（Dependabot など）によるリグレッション検知を主な目的としています。
 
 ---
 
