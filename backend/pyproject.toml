@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "学習支援 Web アプリのバックエンド"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "Django==5.2.14",
+    "Django==5.2.16",
     "django-cors-headers==4.9.0",
     "djangorestframework==3.17.2",
     "djangorestframework-simplejwt==5.5.1",
